@@ -1,0 +1,82 @@
+PROCEDURE  actmosmopr(lcPath, cmcod, IsVisible, IsQuit) && œÂ‰‚‡ËÚÂÎ¸Ì˚È ÔÓÚÓÍÓÎ
+ IF !fso.FileExists(ptempl+'\PrSPqqmmy.dot')
+  MESSAGEBOX(CHR(13)+CHR(10)+'Œ“—”“—“¬”≈“ ‘¿…À PrSPqqmmy.DOT!'+CHR(13)+CHR(10),0+16,'')
+  RETURN 
+ ENDIF 
+ 
+ m.lpuname = IIF(SEEK(lpuid, 'sprlpu'), ALLTRIM(sprlpu.fullname), '')
+ 
+ IF !fso.FolderExists(lcPath)
+  MESSAGEBOX(CHR(13)+CHR(10)+'Œ“—”“—“¬”≈“ ƒ»–≈ “Œ–»ﬂ'+CHR(13)+CHR(10)+;
+   UPPER(ALLTRIM(lcPath))+CHR(13)+CHR(10),0+16,'')
+  RETURN 
+ ENDIF 
+ 
+ m.totrecs     = paz
+ m.s_all       = s_all
+ m.recsinsspok = paz-pazdef
+ m.sumprin     = s_all - sumdef
+ m.cmessage    = ALLTRIM(cmessage) 
+ m.mmy         = PADL(tmonth,2,'0')+RIGHT(STR(tyear,4),1)
+ m.arcfname    = 'd4708'+'.'+m.mmy
+ m.poi         = fso.GetFile(lcPath + '\' + arcfname)
+ m.arcfdate    = poi.DateLastModified
+
+ DotName = pTempl + '\PrSPqqmmy.dot'
+ DocName = lcPath + '\PrSP' + UPPER(m.qcod)+PADL(tMonth,2,'0')+RIGHT(STR(tYear,4),1)
+
+ TRY 
+ oWord=GETOBJECT(,"Word.Application")
+ CATCH 
+  oWord=CREATEOBJECT("Word.Application")
+ ENDTRY 
+
+ oDoc = oWord.Documents.Add(dotname)
+
+ oDoc.Bookmarks('smpname').Select  
+ oWord.Selection.TypeText(m.lpuname)
+
+ oDoc.Bookmarks('smoname').Select  
+ oWord.Selection.TypeText(m.qname)
+
+ oDoc.Bookmarks('period').Select  
+ oWord.Selection.TypeText(+NameOfMonth(VAL(SUBSTR(m.gcperiod,5,2)))+' '+SUBSTR(m.gcperiod,1,4)+' „Ó‰‡')
+
+ oDoc.Bookmarks('recsinssp').Select  
+ oWord.Selection.TypeText(ALLTRIM(STR(m.totrecs)))
+
+ oDoc.Bookmarks('sumpredst').Select  
+ oWord.Selection.TypeText(TRANSFORM(m.s_all,'99999999.99'))
+
+ oDoc.Bookmarks('recsinsspok').Select  
+ oWord.Selection.TypeText(ALLTRIM(STR(m.recsinsspok)))
+
+ oDoc.Bookmarks('sumprin').Select  
+ oWord.Selection.TypeText(TRANSFORM(m.sumprin,'99999999.99'))
+
+ oDoc.Bookmarks('arcfname').Select  
+ oWord.Selection.TypeText(m.arcfname)
+ oDoc.Bookmarks('arcfdate').Select  
+ oWord.Selection.TypeText(DTOC(m.arcfdate))
+ oDoc.Bookmarks('zipitemcount').Select  
+ oWord.Selection.TypeText(STR(3,1))
+ oDoc.Bookmarks('cmessage').Select  
+ oWord.Selection.TypeText(m.cmessage)
+
+ TRY 
+  oDoc.SaveAs(DocName, 17)
+ CATCH 
+ ENDTRY 
+ oDoc.SaveAs(DocName, 0)
+ 
+ IF IsVisible == .t. 
+  oWord.Visible = .t.
+ ELSE 
+  oDoc.Close(0)
+  IF IsQuit
+   oWord.Quit
+  ENDIF 
+ ENDIF 
+ 
+RETURN 
+ 
